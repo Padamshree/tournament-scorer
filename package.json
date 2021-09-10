@@ -26,5 +26,8 @@
     "nodemon": "^2.0.7"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "engines": {
+    "node": "14.16.1"
+  }
 }
