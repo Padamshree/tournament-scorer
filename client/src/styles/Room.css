@@ -1,0 +1,24 @@
+.scores {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.score-button {
+    padding: 1px;
+    margin: 10px;
+}
+
+.score-container {
+    width: 500px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.player {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 10px;
+}
