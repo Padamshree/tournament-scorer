@@ -20,7 +20,7 @@ const Room = ({ socket }) => {
     const [redName, setRedName] = useState('');
     const [scoreMarked, setScoreMarked] = useState(false);
     const [scoreArray, setScoreArray]  = useState([]);
-    const [winner, setWinner] = useState('');
+    const [matchWinner, setMatchWinner] = useState('');
 
     const [redblinkWinner, setRedBlinkWinner] = useState('');
     const [blueblinkWinner, setBlueBlinkWinner] = useState('');
@@ -60,7 +60,7 @@ const Room = ({ socket }) => {
             }
 
             if (winner) {
-                setWinner(winner);
+                setMatchWinner(winner);
                 setScoreMarked(true);
                 winner === blueName ? 
                 setBlueBlinkWinner(winnerClass): setRedBlinkWinner(winnerClass);
@@ -97,8 +97,8 @@ const Room = ({ socket }) => {
             setBlueScore(data.blueScore);
             setScoreArray(data.scorers);
             if (data.winner) {
-                setWinner(data.winner);
-                winner === blueName ? 
+                setMatchWinner(data.winner);
+                data.winner === blueName ? 
                 setBlueBlinkWinner(winnerClass): setRedBlinkWinner(winnerClass);
             }
         });
@@ -166,7 +166,7 @@ const Room = ({ socket }) => {
                      </Button>
                      <br />
                      {
-                        winner && winner === redName &&
+                        matchWinner && matchWinner === redName &&
                             (
                                 <div className="blink-winner"><p>Winner</p></div>
                             )
@@ -198,7 +198,7 @@ const Room = ({ socket }) => {
                      </Button>
                      <br />
                      {
-                        winner && winner === blueName &&
+                        matchWinner && matchWinner === blueName &&
                             (
                                 <div className="blink-winner"><p>Winner</p></div>
                             )
