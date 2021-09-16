@@ -1,0 +1,17 @@
+.container {
+    margin-top: 80px;
+}
+
+.outlined-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    max-height: 600px;
+    border: 2px solid black;
+    padding: 0px 40px;
+}
+
+.box-header {
+    font-weight: 500;
+}

@@ -26,9 +26,10 @@ io.on('connection', (socket) => {
             redScore, 
             email, 
             token,
+            scoreLimit,
             scoreArray } = data;
 
-        if ((blueScore+redScore) === 5) {
+        if ((blueScore+redScore) >= scoreLimit) {
             winner = (blueScore > redScore) 
             ? blueName : redName;
         }
@@ -41,7 +42,7 @@ io.on('connection', (socket) => {
         };
 
         // console.log('UPDATED DATA', updateData);
-        if ((blueScore + redScore) <= 5) {
+        if ((blueScore + redScore) <= scoreLimit) {
             db.collection('scores').doc(token).update(updateData)
             .then(() => {
                 return db.collection('scores').doc(token).get()
@@ -51,6 +52,7 @@ io.on('connection', (socket) => {
                         blueScore: res.data().blueScore,
                         redScore: res.data().redScore,
                         scorers: res.data().scorers,
+                        winner: res.data().winner,
                     }
                     io.sockets.emit('score', fetchedData);
                 })
@@ -73,14 +75,16 @@ app.get('/bello', (req, res) => {
 });
 
 app.post('/createRoom', verifyToken, (req, res) => {
-    const { blueName, redName } = req.body;
+    const { blueName, redName, scoreCount, judgeList } = req.body;
     const roomSchema = {
         blueName,
         redName,
         blueScore: 0,
         redScore: 0,
         winner: '',
+        scoreCount,
         scorers: [],
+        allowedJudges: judgeList,
     }
     db.collection('scores').add(roomSchema)
     .then(response => {

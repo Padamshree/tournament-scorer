@@ -3,6 +3,8 @@ import  { useHistory } from 'react-router-dom';
 import { TextField, Button } from '@material-ui/core';
 import { post, get } from '../utils';
 
+import '../styles/Login.css';
+
 export default function Login(props) {
     let history = useHistory();
     const [email, setEmail]= useState('');
@@ -40,34 +42,37 @@ export default function Login(props) {
     }
 
     return (
-        <div>
-            Login Here
-            <br />
-            <TextField
-                className="user-input"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-            />
-            <br />
-            <TextField
-                className="user-input"
-                placeholder="Password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-            />
-            <br />
-            <div style={{ margin: '20px' }}>
-            <Button
-                style={{ margin: '7px' }}
-                variant="contained"
-                color="primary"
-                onClick={handleAuth}
-            >
-                Signin
-            </Button>
+        <div className='container'>
+            <div className='outlined-box'>
+                <h3 className='box-header'>Login</h3>
+                <br />
+                <TextField
+                    className="user-input"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                />
+                <br />
+                <TextField
+                    className="user-input"
+                    placeholder="Password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                />
+                <br />
+                <div style={{ margin: '20px' }}>
+                <Button
+                    style={{ margin: '7px' }}
+                    variant="contained"
+                    color="primary"
+                    onClick={handleAuth}
+                >
+                    Signin
+                </Button>
+                </div>
             </div>
+            
         </div>
     )
 }

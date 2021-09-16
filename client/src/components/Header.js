@@ -30,7 +30,7 @@ const Header = (props) => {
             <Button
               size='small'
               variant='contained'
-              color='inherit'
+              color='primary'
               onClick={handleLogout}
             >
               Logout
