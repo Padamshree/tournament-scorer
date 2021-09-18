@@ -14,7 +14,6 @@ export default function Register(props) {
 
     useEffect(() => {
         if (props.token) {
-            console.log('Bello');
             history.push('/');
         }
     }, []);
@@ -25,7 +24,9 @@ export default function Register(props) {
         post('/register', { email, password, name })
         .then(res => res.json())
         .then(res => {
-                console.log(res);
+            if (res.success) {
+                history.push('/login');
+            }
         })
         .catch(err => {
             console.log(err);

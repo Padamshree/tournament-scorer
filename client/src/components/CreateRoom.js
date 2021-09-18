@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button, TextField } from '@material-ui/core';
 import Select from 'react-select';
 import makeAnimated from 'react-select/animated';
+import Popup from './Popup';
 
 import { get, post } from '../utils';
 
@@ -14,7 +15,6 @@ const judgeCountOptions = [
 
 export default function CreateRoom() {
 
-    // const animatedComponents = makeAnimated();
     const roomBaseURL = window.location.origin + '/room/';
 
     const [blueName, setBlueName] = useState("");
@@ -29,11 +29,12 @@ export default function CreateRoom() {
     const [roomCreated, setRoomCreated] = useState(false);
     const [roomId, setRoom] = useState("");
 
+    const [togglePopup, setTogglePopup] = useState({ message: '', success: false });
+
     useEffect(() => {
         get('/get_users')
         .then(res => res.json())
         .then(res => {
-            console.log(res);
             let newList = [];
             res.userList.map((user) => {
                 newList = [...newList,  
@@ -65,7 +66,11 @@ export default function CreateRoom() {
         }
 
         if (errors.length) {
-            console.log(errors[0]);
+            const toggleOpen = {
+                message: errors[0],
+                success: false,
+            }
+            setTogglePopup(toggleOpen);
         } else {
             const data = {
                 redName,
@@ -76,11 +81,20 @@ export default function CreateRoom() {
             post('/createRoom', data)
             .then(res => res.json())
             .then(res => {
-                console.log(res);
+                let toggleOpen = {};
                 if (res.success) {
+                    toggleOpen = {
+                        message: res.message,
+                        success: res.success,
+                    }
+                    setTogglePopup(toggleOpen);
                     setRoom(res.room);
                     setRoomCreated(true);
                 } else {
+                    toggleOpen = {
+                        message: res.message,
+                        success: res.success,
+                    }
                     console.log('Failed to create Room');
                 }
             });
@@ -98,12 +112,16 @@ export default function CreateRoom() {
         setRoomCreated(false);
     }
 
+    const closePopup = () => {
+        setTogglePopup({ message: '', success: false });
+    }
+
     useEffect(() => {
         let newList = [];
         let displayList = [];
         selectedJudges.map((judge) => {
             displayList = [...displayList, judge.label];
-            newList = [...newList, judge.value];
+            newList = [...newList, { name: judge.label, email: judge.value }];
         });
         newList = newList.slice(0, judgeCount.value);
         displayList = displayList.slice(0, judgeCount.value);
@@ -204,6 +222,18 @@ export default function CreateRoom() {
             <br />
             <br />
             {
+                roomId && roomId !== null 
+                && <TextField
+                        style={{ width: "25rem" }}
+                        label="Room Id"
+                        value={`${roomBaseURL}${roomId}`}
+                        InputProps={{
+                            readOnly: true,
+                        }}
+                    />
+            }
+            <br />
+            {
                 roomId && 
                     <Button
                         color='primary'
@@ -214,16 +244,12 @@ export default function CreateRoom() {
                     </Button>
             }
             <br />
-            <br />
             {
-                roomId && roomId !== null 
-                && <TextField
-                        style={{ width: "25rem" }}
-                        label="Room Id"
-                        value={`${roomBaseURL}${roomId}`}
-                        InputProps={{
-                            readOnly: true,
-                        }}
+                togglePopup.message && 
+                    <Popup 
+                        {...togglePopup}
+                        open={true}
+                        handlePopup={closePopup}
                     />
             }
         </div>

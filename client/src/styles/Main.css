@@ -1,0 +1,25 @@
+.match-container {
+    margin: 0 auto;
+    margin-top: 50px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.match-container > h2 {
+    margin: 0 auto;
+    padding: 20px 10px;
+}
+
+.matches-list {
+    width: 80%;
+    margin: 0 auto;
+    /* margin-top: 100px; */
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.single-match {
+    margin: 20px;
+}

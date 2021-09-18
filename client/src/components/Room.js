@@ -34,7 +34,6 @@ const Room = ({ socket }) => {
         get(URL)
         .then(res => res.json())
         .then(res => {
-            console.log(res);
             const { data } = res;
             const { data: {
                 allowedJudges,
@@ -46,13 +45,18 @@ const Room = ({ socket }) => {
                 redName,
                 winner }} = res;
 
-            const checkPermissions = allowedJudges.includes(email);
+            let allowedEmails = [];
+
+            allowedJudges.map(judge => {
+                allowedEmails.push(judge.email);
+            })
+
+            const checkPermissions = allowedEmails.includes(email);
 
             if (checkPermissions) {
                 setLoading(false);
                 setAllowScoring(true);
             } else if (role === 'admin') {
-                console.log('Chai')
                 setLoading(false);
                 setAllowScoring(false);
             } else {
@@ -62,8 +66,12 @@ const Room = ({ socket }) => {
             if (winner) {
                 setMatchWinner(winner);
                 setScoreMarked(true);
-                winner === blueName ? 
-                setBlueBlinkWinner(winnerClass): setRedBlinkWinner(winnerClass);
+                if (winner === blueName) {
+                    setBlueBlinkWinner(winnerClass)
+                }
+                if (winner == redName) {
+                    setRedBlinkWinner(winnerClass)
+                }
             } else {
                 setScoreMarked(false);
             }
@@ -98,8 +106,12 @@ const Room = ({ socket }) => {
             setScoreArray(data.scorers);
             if (data.winner) {
                 setMatchWinner(data.winner);
-                data.winner === blueName ? 
-                setBlueBlinkWinner(winnerClass): setRedBlinkWinner(winnerClass);
+                if (data.winner === blueName) {
+                    setBlueBlinkWinner(winnerClass)
+                }
+                if (data.winner == redName) {
+                    setRedBlinkWinner(winnerClass)
+                }
             }
         });
     }, []);

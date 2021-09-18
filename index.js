@@ -1,10 +1,12 @@
 const express = require('express');
+const firebase = require('firebase');
 const path = require('path');
 const app = express();
 const server = require('http').Server(app);
 const cors = require('cors');
 const io = require('socket.io')(server);
-const { db, auth }  = require('./config/firebase');
+
+const { db, auth, admin }  = require('./config/firebase');
 const {  verifyToken } = require('./config/fbAuth');
 
 const port = process.env.PORT || 5000;
@@ -84,13 +86,14 @@ app.post('/createRoom', verifyToken, (req, res) => {
         winner: '',
         scoreCount,
         scorers: [],
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         allowedJudges: judgeList,
     }
     db.collection('scores').add(roomSchema)
     .then(response => {
         console.log(response.id);
         res.status(200).json({
-            message: "Success! Room created",
+            message: "Room created successfully.",
             room: response.id,
             success: true,
         });
@@ -98,7 +101,7 @@ app.post('/createRoom', verifyToken, (req, res) => {
     .catch(err => {
         console.log(err);
         res.status(200).json({
-            message: "Failed to create Room",
+            message: "Failed to create Room.",
             room: "",
             success: false,
         });
@@ -153,17 +156,67 @@ app.get('/get_users', async (req, res) => {
         });
     }
 
-    // db.collection('users').get()
-    // .then(response => {
-    //     response.docs.map(doc => {
-    //         user_list.push({
-    //             id: doc.id,
-    //             name: doc.data().name,
-    //             email: doc.data().email,
-    //         });
-    //     })
-    // })
-})
+});
+
+app.get('/matches', async (req, res) => {
+        
+    const data = await db.collection("scores").orderBy("createdAt").limit(5).get();
+
+    let matches = [];
+    let lastKey = "";
+    data.forEach((doc) => {
+        matches.push({
+        matchId: doc.id,
+        ...doc.data()
+        });
+        lastKey = doc.data().createdAt;
+    });
+
+    if (matches.length) {
+        res.status(200).json({
+            success: true,
+            matches,
+            lastKey,
+        });
+    } else {
+        res.status(200).json({
+            success: false,
+            matches: [],
+            lastKey: ''
+        });
+    }
+});
+
+app.get('/matchesNextBatch', async (req, res) => {
+    
+    const url = new URL(`https://notarandomsite.com/${req.originalUrl}`);
+    const key = url.searchParams.get('key');
+    const data = await db.collection("scores").orderBy("createdAt").startAfter(key).limit(5).get();
+
+    let matches = [];
+    let lastKey = "";
+    data.forEach((doc) => {
+        matches.push({
+        matchId: doc.id,
+        ...doc.data()
+        });
+        lastKey = doc.data().createdAt;
+    });
+
+    if (matches.length) {
+        res.status(200).json({
+            success: true,
+            matches,
+            lastKey,
+        });
+    } else {
+        res.status(200).json({
+            success: false,
+            matches: [],
+            lastKey: ''
+        });
+    }
+});
 
 app.post('/signin', (req, res) => {
     const { email, password } = req.body;
@@ -187,8 +240,8 @@ app.post('/signin', (req, res) => {
                 success: true,  
                 token: idToken, 
                 role: userRole,
-                email: email
-                
+                email: email,
+                message: 'Login Successful',
             });
             res.end();
         })
