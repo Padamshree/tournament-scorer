@@ -1,8 +1,26 @@
-.header{
+.header {
     background-color: aquamarine;
     width: 100%;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-around;
+}
+
+.header h3 {
+    cursor: pointer;
+}
+
+.auth-routes {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-routes h4 {
+    cursor: pointer;
+}
+
+.auth-routes div {
+    margin-right: 1.5rem;
 }

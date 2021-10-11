@@ -18,50 +18,60 @@ io.on('connection', (socket) => {
     socket.emit('gossip', {message: `Your socket id ${socket.id}`});
     
     socket.on('updateScore', (data) => {
-        
-        let winner = '';
-
+        console.log('CHIRANDNADNDNASLJNLADJNLADJNDLAJNDLA');
         const {
             blueName,
             redName,
             blueScore, 
-            redScore, 
-            email, 
+            redScore,  
             token,
             scoreLimit,
-            scoreArray } = data;
+            scoreArray,
+            matchWinner } = data;
 
-        if ((blueScore+redScore) >= scoreLimit) {
-            winner = (blueScore > redScore) 
-            ? blueName : redName;
-        }
-        
-        const updateData = {
-            winner,
-            redScore,
-            blueScore,
-            scorers: scoreArray
-        };
+        console.log('matchwinner', matchWinner);
 
-        // console.log('UPDATED DATA', updateData);
-        if ((blueScore + redScore) <= scoreLimit) {
-            db.collection('scores').doc(token).update(updateData)
-            .then(() => {
-                return db.collection('scores').doc(token).get()
-                .then((res) => {
-                    console.log('GET DATA', res.data().scorers);
-                    const fetchedData = {
-                        blueScore: res.data().blueScore,
-                        redScore: res.data().redScore,
-                        scorers: res.data().scorers,
-                        winner: res.data().winner,
-                    }
-                    io.sockets.emit('score', fetchedData);
+        if (!matchWinner) {
+            console.log('Nasha');
+            let winner = '';
+
+            if (blueScore > (scoreLimit/2)) {
+                console.log('Nasha1');
+                winner = blueName;
+            }
+    
+            if (redScore > (scoreLimit/2)) {
+                console.log('Nasha2');
+                winner = redName;
+            }
+            
+            const updateData = {
+                winner,
+                redScore,
+                blueScore,
+                scorers: scoreArray
+            };
+    
+            // console.log('UPDATED DATA', updateData);
+            // if ((blueScore + redScore) <= scoreLimit) {
+                db.collection('scores').doc(token).update(updateData)
+                .then(() => {
+                    return db.collection('scores').doc(token).get()
+                    .then((res) => {
+                        console.log('GET DATA', res.data());
+                        const fetchedData = {
+                            blueScore: res.data().blueScore,
+                            redScore: res.data().redScore,
+                            scorers: res.data().scorers,
+                            winner: res.data().winner,
+                        }
+                        io.sockets.emit('score', fetchedData);
+                    })
                 })
-            })
-            .catch(err => console.log('Data not updated', err));    
-        } else {
-            console.log('Match Over');
+                .catch(err => console.log('Data not updated', err));    
+            // } else {
+            //     console.log('Match Over');
+            // }
         }
     });
 

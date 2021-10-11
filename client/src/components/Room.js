@@ -34,7 +34,6 @@ const Room = ({ socket }) => {
         get(URL)
         .then(res => res.json())
         .then(res => {
-            const { data } = res;
             const { data: {
                 allowedJudges,
                 scorers,
@@ -44,6 +43,7 @@ const Room = ({ socket }) => {
                 blueName,
                 redName,
                 winner }} = res;
+            console.log(scoreCount);
 
             let allowedEmails = [];
 
@@ -107,10 +107,10 @@ const Room = ({ socket }) => {
             if (data.winner) {
                 setMatchWinner(data.winner);
                 if (data.winner === blueName) {
-                    setBlueBlinkWinner(winnerClass)
+                    setBlueBlinkWinner(winnerClass);
                 }
-                if (data.winner == redName) {
-                    setRedBlinkWinner(winnerClass)
+                if (data.winner === redName) {
+                    setRedBlinkWinner(winnerClass);
                 }
             }
         });
@@ -118,8 +118,7 @@ const Room = ({ socket }) => {
 
     useEffect(() => {
         if (connect && scoreMarked && allowScoring) {
-            let updatedArray = [...scoreArray];
-            updatedArray.push(email);
+            let updatedArray = [...scoreArray, email];
             setScoreArray(updatedArray);
             const data = {
                 blueName,
@@ -129,6 +128,7 @@ const Room = ({ socket }) => {
                 token,
                 email,
                 scoreLimit,
+                matchWinner,
                 scoreArray: updatedArray,
             }
             socket.emit('updateScore', data);

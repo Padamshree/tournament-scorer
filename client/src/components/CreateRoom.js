@@ -167,8 +167,10 @@ export default function CreateRoom() {
                     options={judgeCountOptions}
                     onChange={(option, _action) => {
                         setJudgeCount(option);
-                        judgeCount && judgeCount.value >= 0 ? 
-                        setJudgeCountFilled(true): setJudgeCountFilled(false)
+                        // judgeCount && judgeCount.value >= 0 ? 
+                        // setJudgeCountFilled(true): setJudgeCountFilled(false);
+                        setFinalJudges({ finalList: [], displayList: '' });
+                        setSelectedJudges([]);
                         }
                     }
                 />
@@ -177,7 +179,7 @@ export default function CreateRoom() {
                     placeholder="Select Judges"
                     isMulti
                     isSearchable
-                    isDisabled={judgeCountFilled}
+                    isDisabled={roomId ? true: false}
                     options={judgeList}
                     value={selectedJudges && selectedJudges.length > 0
                     && selectedJudges.map((judge) => ({ value: judge.value, label: judge.label }))}
