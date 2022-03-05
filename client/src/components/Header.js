@@ -32,7 +32,7 @@ const Header = (props) => {
             { role && role === 'admin'
               &&
               <div>
-                <h4 onClick={() => history.push('createRoom')}>
+                <h4 onClick={() => history.push('/createRoom')}>
                 Create New Match
               </h4>
               </div>

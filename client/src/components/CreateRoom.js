@@ -131,7 +131,7 @@ export default function CreateRoom() {
 
     return (
         <div className='create-main'>
-            Hello, Enter names and create Room.
+            Enter names and create Room.
             <br />
             <br />
             <div>
