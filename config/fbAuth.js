@@ -1,4 +1,4 @@
-const { admin, auth } = require('./firebase');
+const { admin, auth, db } = require('./firebase');
 
 exports.verifyToken = (req, res, next) => {
     const token = req.headers.authorization;

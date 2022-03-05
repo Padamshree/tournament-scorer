@@ -19,6 +19,17 @@
 .player {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     margin: 10px;
+}
+
+.blink-winner {
+    animation: blinker 1s linear infinite;
+}
+
+.blink-winner > p {
+    text-align: center;
+}
+  
+@keyframes blinker {  
+    50% { opacity: 0; }
 }

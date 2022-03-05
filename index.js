@@ -1,10 +1,12 @@
 const express = require('express');
+const firebase = require('firebase');
 const path = require('path');
 const app = express();
 const server = require('http').Server(app);
 const cors = require('cors');
 const io = require('socket.io')(server);
-const { db, auth }  = require('./config/firebase');
+
+const { db, auth, admin }  = require('./config/firebase');
 const {  verifyToken } = require('./config/fbAuth');
 
 const port = process.env.PORT || 5000;
@@ -16,48 +18,60 @@ io.on('connection', (socket) => {
     socket.emit('gossip', {message: `Your socket id ${socket.id}`});
     
     socket.on('updateScore', (data) => {
-        
-        let winner = '';
-
+        console.log('CHIRANDNADNDNASLJNLADJNLADJNDLAJNDLA');
         const {
             blueName,
             redName,
             blueScore, 
-            redScore, 
-            email, 
+            redScore,  
             token,
-            scoreArray } = data;
+            scoreLimit,
+            scoreArray,
+            matchWinner } = data;
 
-        if ((blueScore+redScore) === 5) {
-            winner = (blueScore > redScore) 
-            ? blueName : redName;
-        }
-        
-        const updateData = {
-            winner,
-            redScore,
-            blueScore,
-            scorers: scoreArray
-        };
+        console.log('matchwinner', matchWinner);
 
-        // console.log('UPDATED DATA', updateData);
-        if ((blueScore + redScore) <= 5) {
-            db.collection('scores').doc(token).update(updateData)
-            .then(() => {
-                return db.collection('scores').doc(token).get()
-                .then((res) => {
-                    console.log('GET DATA', res.data().scorers);
-                    const fetchedData = {
-                        blueScore: res.data().blueScore,
-                        redScore: res.data().redScore,
-                        scorers: res.data().scorers,
-                    }
-                    io.sockets.emit('score', fetchedData);
+        if (!matchWinner) {
+            console.log('Nasha');
+            let winner = '';
+
+            if (blueScore > (scoreLimit/2)) {
+                console.log('Nasha1');
+                winner = blueName;
+            }
+    
+            if (redScore > (scoreLimit/2)) {
+                console.log('Nasha2');
+                winner = redName;
+            }
+            
+            const updateData = {
+                winner,
+                redScore,
+                blueScore,
+                scorers: scoreArray
+            };
+    
+            // console.log('UPDATED DATA', updateData);
+            // if ((blueScore + redScore) <= scoreLimit) {
+                db.collection('scores').doc(token).update(updateData)
+                .then(() => {
+                    return db.collection('scores').doc(token).get()
+                    .then((res) => {
+                        console.log('GET DATA', res.data());
+                        const fetchedData = {
+                            blueScore: res.data().blueScore,
+                            redScore: res.data().redScore,
+                            scorers: res.data().scorers,
+                            winner: res.data().winner,
+                        }
+                        io.sockets.emit('score', fetchedData);
+                    })
                 })
-            })
-            .catch(err => console.log('Data not updated', err));    
-        } else {
-            console.log('Match Over');
+                .catch(err => console.log('Data not updated', err));    
+            // } else {
+            //     console.log('Match Over');
+            // }
         }
     });
 
@@ -73,20 +87,23 @@ app.get('/bello', (req, res) => {
 });
 
 app.post('/createRoom', verifyToken, (req, res) => {
-    const { blueName, redName } = req.body;
+    const { blueName, redName, scoreCount, judgeList } = req.body;
     const roomSchema = {
         blueName,
         redName,
         blueScore: 0,
         redScore: 0,
         winner: '',
+        scoreCount,
         scorers: [],
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        allowedJudges: judgeList,
     }
     db.collection('scores').add(roomSchema)
     .then(response => {
         console.log(response.id);
         res.status(200).json({
-            message: "Success! Room created",
+            message: "Room created successfully.",
             room: response.id,
             success: true,
         });
@@ -94,7 +111,7 @@ app.post('/createRoom', verifyToken, (req, res) => {
     .catch(err => {
         console.log(err);
         res.status(200).json({
-            message: "Failed to create Room",
+            message: "Failed to create Room.",
             room: "",
             success: false,
         });
@@ -149,17 +166,67 @@ app.get('/get_users', async (req, res) => {
         });
     }
 
-    // db.collection('users').get()
-    // .then(response => {
-    //     response.docs.map(doc => {
-    //         user_list.push({
-    //             id: doc.id,
-    //             name: doc.data().name,
-    //             email: doc.data().email,
-    //         });
-    //     })
-    // })
-})
+});
+
+app.get('/matches', async (req, res) => {
+        
+    const data = await db.collection("scores").orderBy("createdAt").limit(5).get();
+
+    let matches = [];
+    let lastKey = "";
+    data.forEach((doc) => {
+        matches.push({
+        matchId: doc.id,
+        ...doc.data()
+        });
+        lastKey = doc.data().createdAt;
+    });
+
+    if (matches.length) {
+        res.status(200).json({
+            success: true,
+            matches,
+            lastKey,
+        });
+    } else {
+        res.status(200).json({
+            success: false,
+            matches: [],
+            lastKey: ''
+        });
+    }
+});
+
+app.get('/matchesNextBatch', async (req, res) => {
+    
+    const url = new URL(`https://notarandomsite.com/${req.originalUrl}`);
+    const key = url.searchParams.get('key');
+    const data = await db.collection("scores").orderBy("createdAt").startAfter(key).limit(5).get();
+
+    let matches = [];
+    let lastKey = "";
+    data.forEach((doc) => {
+        matches.push({
+        matchId: doc.id,
+        ...doc.data()
+        });
+        lastKey = doc.data().createdAt;
+    });
+
+    if (matches.length) {
+        res.status(200).json({
+            success: true,
+            matches,
+            lastKey,
+        });
+    } else {
+        res.status(200).json({
+            success: false,
+            matches: [],
+            lastKey: ''
+        });
+    }
+});
 
 app.post('/signin', (req, res) => {
     const { email, password } = req.body;
@@ -183,8 +250,8 @@ app.post('/signin', (req, res) => {
                 success: true,  
                 token: idToken, 
                 role: userRole,
-                email: email
-                
+                email: email,
+                message: 'Login Successful',
             });
             res.end();
         })

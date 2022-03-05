@@ -8,6 +8,7 @@ import '../styles/Header.css';
 const Header = (props) => {
 
   const history = useHistory();
+  const role = localStorage.userRole;
 
   const handleLogout = () => {
 
@@ -20,21 +21,32 @@ const Header = (props) => {
       history.push('/login');
     })
     .catch((err) => console.log(err));
-  }
+  };
+
   return (
     <div className='header'>
-      <h3>Tournament Scorer</h3>
+      <h3 onClick={() => history.push('/')}>Tournament Scorer</h3>
       {
         props.token &&
-          <div>
-            <Button
-              size='small'
-              variant='contained'
-              color='inherit'
-              onClick={handleLogout}
-            >
-              Logout
-            </Button>
+          <div className="auth-routes">
+            { role && role === 'admin'
+              &&
+              <div>
+                <h4 onClick={() => history.push('/createRoom')}>
+                Create New Match
+              </h4>
+              </div>
+            }
+            <div>
+              <Button
+                size='small'
+                variant='contained'
+                color='primary'
+                onClick={handleLogout}
+              >
+                Logout
+              </Button>
+            </div>
           </div>
       }
     </div>

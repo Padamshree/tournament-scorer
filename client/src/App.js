@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { io } from 'socket.io-client';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
 
@@ -9,7 +9,6 @@ import Login from './components/Login';
 import './styles/App.css';
 import AdminRoute from './utils/adminRoutes';
 import PrivateRoute from './utils/privateRoutes';
-import { get, post } from './utils';
 import Main from './components/Main';
 import Header from './components/Header';
 import Register from './components/Register';
@@ -21,7 +20,6 @@ if (localStorage.fbToken) {
         localStorage.clear();
     }
 }
-
 
 const socket = io();
 
